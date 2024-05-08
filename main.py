@@ -31,30 +31,38 @@ print(f"monai={monai.__version__} | generative={generative.__version__} | torch=
 
 
 parser = ArgumentParser()
-parser.add_argument('--data_path', type=str, help='path to data')
+#parser.add_argument('--data_path', type=str, help='path to data')
 parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
+parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
 
 args = parser.parse_args()
 
+do_log_wandb = True
+if args.wandb_api is None:
+    print('NO wandb api key was given, disabling wandb logging')
+    do_log_wandb = False
+
+config = {
+    "learning_rate": 2.5e-5,
+    "epochs": 2_000,
+    "img_size": (168, 168),
+    "patch_size": (4, 4),
+    "batch_size": 8,
+    "num_heads": 16,
+    "noise_schedule": "linear_beta",
+    "dropout": 0.5,
+}
 # WandB login and config setup
-wandb_key = args.wandb_api
-wandb.login(key=wandb_key)
-wandb.init(
-    project="synthrad_2d_since_drpout",
-    config={
-        "learning_rate": 2.5e-5,
-        "epochs": 2_000,
-        "img_size": (168, 168),
-        "patch_size": (4, 4),
-        "batch_size": 8,
-        "num_heads": 16,
-        "noise_schedule": "linear_beta",
-        "dropout": 0.5,
-    }
-)
+if do_log_wandb:
+    wandb_key = args.wandb_api
+    wandb.login(key=wandb_key)
+    wandb.init(
+        project="synthrad_2d_since_drpout",
+        config=config
+    )
 
 # Data path setup
-data_path = args.data_path
+data_path = './data' #args.data_path
 out_dir = 'outputs'
 img_out = os.path.join(out_dir, 'images')
 model_out = os.path.join(out_dir, 'model_checkpoints')
@@ -66,9 +74,9 @@ if not os.path.exists(model_out):
 
 set_determinism(42)
 
-img_size = wandb.config['img_size']
-patch_size = wandb.config['patch_size']
-batch_size = wandb.config['batch_size']
+img_size = wandb.config['img_size'] if do_log_wandb else config['img_size']
+patch_size = wandb.config['patch_size'] if do_log_wandb else config['patch_size']
+batch_size = wandb.config['batch_size'] if do_log_wandb else config['batch_size']
 
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 # code taken from these discussions:
@@ -105,24 +113,27 @@ tr_images, val_images = get_data_paths(data_path, shuffle_seed=42)
 tr_images, val_images = preprocess_data(train_images=tr_images, val_images=val_images, img_size=img_size)
 train_loader, val_loader = create_loaders(tr_images, val_images, batch_size=batch_size)
 
-device = torch.device("cuda")
+torch_device = args.torch_device
+device = torch.device("cuda") if torch_device is None else torch.device(torch_device)
 
 model = UNETR(
     in_channels=2,
     out_channels=1,
-    num_heads=wandb.config['num_heads'],
+    num_heads=wandb.config['num_heads'] if do_log_wandb else config['num_heads'],
     patch_size=patch_size[0],
     img_size=img_size[0],
-    dropout=wandb.config['dropout']
+    dropout=wandb.config['dropout'] if do_log_wandb else config['dropout'],
 ).to(device)
+
+print(model)
 
 diffusion_steps = 1000
 
-scheduler = DDPMScheduler(num_train_timesteps=1000, schedule=wandb.config['noise_schedule'])
-optimizer = torch.optim.Adam(params=model.parameters(), lr=wandb.config['learning_rate'])
+scheduler = DDPMScheduler(num_train_timesteps=1000, schedule=wandb.config['noise_schedule'] if do_log_wandb else config['noise_schedule'])
+optimizer = torch.optim.Adam(params=model.parameters(), lr=wandb.config['learning_rate'] if do_log_wandb else config['learning_rate'])
 inferer = DiffusionInferer(scheduler)
 
-n_epochs = wandb.config['epochs']
+n_epochs = wandb.config['epochs'] if do_log_wandb else config['epochs']
 val_interval = 10
 epoch_loss_list = []
 val_epoch_loss_list = []
