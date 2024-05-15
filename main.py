@@ -203,12 +203,13 @@ for epoch in (p_bar := tqdm(range(n_epochs))):
         print("")
         curr_val_epoch_loss = val_epoch_loss / (step + 1)
         print("Epoch", epoch, "Validation loss", curr_val_epoch_loss)
-        wandb.log({
-            "epoch": epoch,
-            "train_loss": train_epoch_loss,
-            "val_loss": curr_val_epoch_loss,
-            # "last_learning_rate": lrs[-1],
-        })
+        if do_log_wandb:
+            wandb.log({
+                "epoch": epoch,
+                "train_loss": train_epoch_loss,
+                "val_loss": curr_val_epoch_loss,
+                # "last_learning_rate": lrs[-1],
+            })
         val_epoch_loss_list.append(curr_val_epoch_loss)
 
         # record model if the validation is currently best
@@ -272,7 +273,8 @@ psnr = PSNRMetric(max_val=1.0)
 mae = MAEMetric()
 
 
-wandb_table = wandb.Table(columns=['MRI', 'CT', 'sCT', 'SSIM', 'PSNR', 'histogram'])
+if do_log_wandb:
+    wandb_table = wandb.Table(columns=['MRI', 'CT', 'sCT', 'SSIM', 'PSNR', 'histogram'])
 
 model.eval()
 
@@ -348,51 +350,53 @@ for idx, data in enumerate(tqdm(val_loader.dataset)):
         histogram = px.histogram(df, x="data", color="series", nbins=100, barmode="overlay")
         histogram.update_layout(xaxis_title="Pixel Value", yaxis_title="Frequency")
 
-        # add row to WandB table
-        wandb_table.add_data(
-            # MRI
-            wandb.Image(log_mr),
-            # CT
-            wandb.Image(log_ct),
-            # synthetic CT
-            wandb.Image(log_s_ct),
-            # SSIM
-            curr_ssim,
-            # PSNR
-            curr_psnr,
-            # Histogram
-            wandb.Html(plotly.io.to_html(histogram))
-        )
+        if do_log_wandb:
+            # add row to WandB table
+            wandb_table.add_data(
+                # MRI
+                wandb.Image(log_mr),
+                # CT
+                wandb.Image(log_ct),
+                # synthetic CT
+                wandb.Image(log_s_ct),
+                # SSIM
+                curr_ssim,
+                # PSNR
+                curr_psnr,
+                # Histogram
+                wandb.Html(plotly.io.to_html(histogram))
+            )
 
         ensemble.append(current_img)
 
 
-df = wandb_table.get_dataframe()
-min_max_table = wandb.Table(columns=['id', 'objective', 'SSIM', 'PSNR', 'histogram'])
-for col in ['SSIM', 'PSNR']:
-    # add max values
-    max_idx = df[col].idxmax()
-    row_max = df.loc[max_idx]
-    min_max_table.add_data(
-        max_idx,
-        'max ' + str(col),
-        row_max['SSIM'],
-        row_max['PSNR'],
-        row_max['histogram']
-    )
-    # now add min values
-    min_idx = df[col].idxmin()
-    row_min = df.loc[min_idx]
-    min_max_table.add_data(
-        min_idx,
-        'min ' + str(col),
-        row_min['SSIM'],
-        row_min['PSNR'],
-        row_min['histogram']
-    )
+if do_log_wandb:
+    df = wandb_table.get_dataframe()
+    min_max_table = wandb.Table(columns=['id', 'objective', 'SSIM', 'PSNR', 'histogram'])
+    for col in ['SSIM', 'PSNR']:
+        # add max values
+        max_idx = df[col].idxmax()
+        row_max = df.loc[max_idx]
+        min_max_table.add_data(
+            max_idx,
+            'max ' + str(col),
+            row_max['SSIM'],
+            row_max['PSNR'],
+            row_max['histogram']
+        )
+        # now add min values
+        min_idx = df[col].idxmin()
+        row_min = df.loc[min_idx]
+        min_max_table.add_data(
+            min_idx,
+            'min ' + str(col),
+            row_min['SSIM'],
+            row_min['PSNR'],
+            row_min['histogram']
+        )
 
-wandb.log({
-    'Evaluation Table': wandb_table,
-    'Min Max Table': min_max_table,
-})
-wandb.finish()
+    wandb.log({
+        'Evaluation Table': wandb_table,
+        'Min Max Table': min_max_table,
+    })
+    wandb.finish()
