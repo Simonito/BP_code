@@ -3,6 +3,8 @@ from torch.cuda.amp import autocast
 from generative.networks.schedulers import DDPMScheduler
 from tqdm import tqdm
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import plotly
 import plotly.express as px
@@ -59,8 +61,7 @@ def log_table_row(index, row, wandb):
     })
 
 
-def perform_benchmark(model_orig, model_patch, val_dataset, img_out_dir, wandb):
-    device = torch.device('cuda')
+def perform_benchmark(model_orig, model_patch, val_dataset, img_out_dir, device, wandb):
     scheduler = retrieve_scheduler()
 
     ssim = SSIMMetric(spatial_dims=2)
@@ -71,7 +72,7 @@ def perform_benchmark(model_orig, model_patch, val_dataset, img_out_dir, wandb):
     model_orig.eval()
     model_patch.eval()
 
-    n = 5
+    n = 1
     for idx, data in enumerate(tqdm(val_dataset)):
         # early stopping condition
         if idx == 50:
@@ -91,7 +92,7 @@ def perform_benchmark(model_orig, model_patch, val_dataset, img_out_dir, wandb):
             combined_patch = torch.cat((current_img_patch, input_mr), dim=1)
 
             scheduler.set_timesteps(num_inference_steps=1000)
-            for t in scheduler.timesteps:
+            for t in tqdm(scheduler.timesteps):
                 with autocast(enabled=False):
                     with torch.no_grad():
                         model_output_orig = model_orig(
@@ -210,7 +211,7 @@ def main(val_dataset,
         )
 
     out_dir = 'outputs'
-    img_out = os.path.join(out_dir, 'baseline_vs_patch',  'images')
+    img_out = os.path.join(out_dir, 'benchmarks', 'baseline_vs_patch',  'images')
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     perform_benchmark(model_orig=model_base,
@@ -218,4 +219,5 @@ def main(val_dataset,
                       val_dataset=val_dataset,
                       img_out_dir=img_out,
                       wandb=wandb if do_log_wandb else None,
+                      device=device,
     )
