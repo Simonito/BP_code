@@ -13,7 +13,6 @@ from generative.inferers import DiffusionInferer
 from torch.optim.lr_scheduler import OneCycleLR
 
 from preprocess import get_data_paths, create_loaders, preprocess_data
-from models.trunet_orig_drop_small import UNETR
 
 import numpy as np
 import pandas as pd
@@ -35,6 +34,7 @@ parser = ArgumentParser()
 parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
 parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
 parser.add_argument('--epochs', type=int, help='Override the default number of epochs (2000)')
+parser.add_argument('--model', type=str, choices=['baseline', 'patch', 'cosine', 'dropout_lin', 'dropout_cos'])
 
 args = parser.parse_args()
 
@@ -44,6 +44,7 @@ if args.wandb_api is None:
     do_log_wandb = False
 
 num_epochs = args.epochs or 2000
+model_arg = args.model or 'baseline'
 config = {
     "learning_rate": 2.5e-5,
     "epochs": num_epochs,
@@ -51,7 +52,7 @@ config = {
     "patch_size": (4, 4),
     "batch_size": 8,
     "num_heads": 16,
-    "noise_schedule": "linear_beta",
+    "noise_schedule": "linear_beta" if model_arg in ['baseline', 'patch', 'dropout_lin'] else "cosine_poly",
     "dropout": 0.5,
 }
 # WandB login and config setup
@@ -65,7 +66,9 @@ if do_log_wandb:
 
 # Data path setup
 data_path = './data' #args.data_path
-out_dir = 'outputs'
+out_dir = os.path.join('outputs', model_arg)
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
 img_out = os.path.join(out_dir, 'images')
 model_out = os.path.join(out_dir, 'model_checkpoints')
 
@@ -118,15 +121,21 @@ train_loader, val_loader = create_loaders(tr_images, val_images, batch_size=batc
 torch_device = args.torch_device
 device = torch.device("cuda") if torch_device is None else torch.device(torch_device)
 
-model = UNETR(
-    in_channels=2,
-    out_channels=1,
-    num_heads=wandb.config['num_heads'] if do_log_wandb else config['num_heads'],
-    patch_size=patch_size[0],
-    img_size=img_size[0],
-    dropout=wandb.config['dropout'] if do_log_wandb else config['dropout'],
-).to(device)
+num_heads = wandb.config['num_heads'] if do_log_wandb else config['num_heads']
+dropout=wandb.config['dropout'] if do_log_wandb else config['dropout']
+if model_arg in ['baseline', 'cosine']:
+    from models.trunet_orig_newFattn import UNETR
+    model = UNETR(in_channels=2, out_channels=1, num_heads=num_heads, patch_size=patch_size[0], img_size=img_size[0])
+elif model_arg == 'patch':
+    from models.trunet_patch_newFattn import UNETR
+    model = UNETR(in_channels=2, out_channels=1, num_heads=num_heads, patch_size=patch_size[0], img_size=img_size[0])
+elif model_arg in ['dropout_lin', 'dropout_cos']:
+    from models.trunet_orig_dropout import UNETR
+    model = UNETR(in_channels=2, out_channels=1, num_heads=num_heads, patch_size=patch_size[0], img_size=img_size[0], dropout=dropout)
+else:
+    ValueError('Unrecognized value for cli model argument (`--model`)')
 
+model.to(device)
 print(model)
 
 diffusion_steps = 1000
