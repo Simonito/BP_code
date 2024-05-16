@@ -34,6 +34,7 @@ parser = ArgumentParser()
 #parser.add_argument('--data_path', type=str, help='path to data')
 parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
 parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
+parser.add_argument('--epochs', type=int, help='Override the default number of epochs (2000)')
 
 args = parser.parse_args()
 
@@ -42,9 +43,10 @@ if args.wandb_api is None:
     print('NO wandb api key was given, disabling wandb logging')
     do_log_wandb = False
 
+num_epochs = args.epochs or 2000
 config = {
     "learning_rate": 2.5e-5,
-    "epochs": 2_000,
+    "epochs": num_epochs,
     "img_size": (168, 168),
     "patch_size": (4, 4),
     "batch_size": 8,
