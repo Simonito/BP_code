@@ -233,6 +233,8 @@ model.load_state_dict(torch.load(os.path.join(model_out, f"model_{best_model_epo
 ##########################
 seaborn_brights = [x for x in plt.style.available if x.startswith('seaborn') and 'bright' in x]
 plt.style.use(seaborn_brights[0] if len(seaborn_brights) > 0 else "default")
+import matplotlib
+matplotlib.use('Agg')
 plt.title("Learning Curves Diffusion Model", fontsize=20)
 plt.plot(np.linspace(1, n_epochs, n_epochs), epoch_loss_list, color="C0", linewidth=2.0, label="Train")
 plt.plot(
