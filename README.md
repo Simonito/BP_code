@@ -12,7 +12,18 @@ conda activate synthrad
 ```
 
 ### Training
-To train the model, execute the `main.py` file:
+To train the model on a cuda device, run following:
 ```bash
 python main.py
+```
+To enable `wandb` logging include *wandb API key* in the
+arguments:
+```bash
+python main.py --wandb_api <YOUR WANDB API KEY>
+```
+If you want to train the model on another torch device,
+include the device name in the arguments
+(in this example we are specifying the `cpu` device):
+```bash
+python main.py --torch_device cpu
 ```
