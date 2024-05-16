@@ -5,7 +5,7 @@ from benchmarks import (
     dropout_lin_vs_cos,
 )
 from preprocess import get_data_paths, preprocess_data, create_loaders
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser
 
 
 def load_val_dataset(data_path, img_size, batch_size):
@@ -17,6 +17,10 @@ def load_val_dataset(data_path, img_size, batch_size):
 
 parser = ArgumentParser()
 parser.add_argument('--benchmark', type=int, help='Which benchmark do you want to run')
+parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
+parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
+parser.add_argument('--model_base', type=str, help='Path to the saved state of the baseline model')
+parser.add_argument('--model_patch', type=str, help='Path to the saved state of the model with patch embeddings')
 args = parser.parse_args()
 
 benchmark_num = args.benchmark
@@ -26,7 +30,13 @@ img_size = (168, 168)
 batch_size = 1
 val_dataset = load_val_dataset('./data', img_size=img_size, batch_size=batch_size)
 if benchmark_num == 1:
-    baseline_vs_patch.main(val_dataset=val_dataset, img_size=img_size[0])
+    baseline_vs_patch.main(val_dataset=val_dataset,
+                           img_size=img_size[0],
+                           wandb_api=args.wandb_api,
+                           torch_device=args.torch_device,
+                           model_base_path=args.model_base,
+                           model_patch_path=args.model_patch,
+    )
 elif benchmark_num == 2:
     linear_vs_cosine.main(val_dataset=val_dataset, img_size=img_size[0])
 elif benchmark_num == 3:
@@ -34,4 +44,4 @@ elif benchmark_num == 3:
 elif benchmark_num == 4:
     dropout_lin_vs_cos.main(val_dataset=val_dataset, img_size=img_size[0])
 else:
-    raise ArgumentError(f'Got unexpected benchmark argument: {benchmark_num}. Valid values are: 1, 2, 3 and 4')
+    raise ValueError(f'Got unexpected benchmark argument: {benchmark_num}. Valid values are: 1, 2, 3 and 4')

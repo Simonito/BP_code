@@ -180,20 +180,15 @@ def perform_benchmark(model_orig, model_patch, val_dataset, img_out_dir, wandb):
         wandb.log({'Evaluation Table': wandb_table})
 
 
-def main(val_dataset, img_size: int):
+def main(val_dataset,
+         img_size: int,
+         wandb_api=None,
+         torch_device=None,
+         model_base_path=None,
+         model_patch_path=None):
     if val_dataset is None:
         raise AttributeError("Missing validation dataset")
-    parser = ArgumentParser()
-    parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
-    parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
-    parser.add_argument('--model_base', type=str, help='Path to the saved state of the baseline model')
-    parser.add_argument('--model_patch', type=str, help='Path to the saved state of the model with patch embeddings')
-
-    args = parser.parse_args()
-    torch_device = args.torch_device
     device = torch.device("cuda") if torch_device is None else torch.device(torch_device)
-    model_base_path = args.model_base
-    model_patch_path = args.model_patch
     if model_base_path is None:
         raise AttributeError('Missing argument that resolves the path to the baseline model state')
     if model_patch_path is None:
@@ -202,7 +197,7 @@ def main(val_dataset, img_size: int):
     model_base, model_patch = load_models(model_base_path, model_patch_path, img_size=img_size, device=device)
 
     do_log_wandb = True
-    if args.wandb_api is None:
+    if wandb_api is None:
         print('NO wandb api key was given, disabling wandb logging')
         do_log_wandb = False
 
