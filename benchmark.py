@@ -16,7 +16,7 @@ def load_val_dataset(data_path, img_size, batch_size):
 
 
 parser = ArgumentParser()
-parser.add_argument('--benchmark', type=int, help='Which benchmark do you want to run')
+parser.add_argument('--benchmark', type=int, choices=[1, 2, 3, 4], help='Which benchmark do you want to run')
 parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
 parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
 parser.add_argument('--model_base', type=str, help='Path to the saved state of the baseline model')
