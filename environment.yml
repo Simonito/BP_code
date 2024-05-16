@@ -12,6 +12,7 @@ dependencies:
       - wandb
       - plotly
       - pandas
+      - scipy
   - pip
 channels:
   - anaconda
