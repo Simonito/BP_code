@@ -1,4 +1,9 @@
-### Environment setup
+# Bachelor Thesis on Radiological Data Processing using Deep Neural Networks
+This repo contains code for Bachelor Thesis that focuses on processing
+radiological data using deep neural networks. More specifically focuses
+on a CT image synthesis from MRI.
+
+# Environment setup
 
 Using Conda create an environment by running the following command:
 
@@ -11,7 +16,7 @@ Activate the environment by running:
 conda activate synthrad
 ```
 
-### Training
+# Training
 To train the model with default values for cli arguments
 (that is baseline model, on a cuda device, without wandb logging, during 2000 epochs) run following:
 ```bash
@@ -26,7 +31,7 @@ Supported CLI arguments:
 | `--model` | Which model to train<br>options={baseline, patch, cosine, dropout_lin, dropout_cos}  |
 
 
-### Benchmarks
+# Benchmarks
 To compare the trained models you can run prepared benchmarks.
 ```bash
 python benchmark.py --benchmark <benchmark_id>
