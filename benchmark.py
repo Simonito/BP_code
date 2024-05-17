@@ -21,6 +21,8 @@ parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
 parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
 parser.add_argument('--model_base', type=str, help='Path to the saved state of the baseline model')
 parser.add_argument('--model_patch', type=str, help='Path to the saved state of the model with patch embeddings')
+parser.add_argument('--model_lin', type=str, help='Path to the saved state of the model with linear schedule')
+parser.add_argument('--model_cos', type=str, help='Path to the saved state of the model with cosine schedule')
 args = parser.parse_args()
 
 benchmark_num = args.benchmark
@@ -38,7 +40,13 @@ if benchmark_num == 1:
                            model_patch_path=args.model_patch,
     )
 elif benchmark_num == 2:
-    linear_vs_cosine.main(val_dataset=val_dataset, img_size=img_size[0])
+    linear_vs_cosine.main(val_dataset=val_dataset,
+                          img_size=img_size[0],
+                          wandb_api=args.wandb_api,
+                          torch_device=args.torch_device,
+                          model_lin_path=args.model_lin,
+                          model_cos_path=args.model_cos,
+    )
 elif benchmark_num == 3:
     lowSampleSteps_lin_vs_cos.main(val_dataset=val_dataset, img_size=img_size[0])
 elif benchmark_num == 4:
