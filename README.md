@@ -37,7 +37,7 @@ Details are below.
 
 Supported `benchmark_id`s are 1, 2, 3 and 4:
 
-1. Baseline vs. Patch
+##### 1. Baseline vs. Patch
 Benchmark with `benchmark_id = 1` compares the baseline model to the one
 with patch and position embeddings.
 
@@ -47,7 +47,7 @@ that specify the path to the saved states of the models:
 python benchmark.py --benchmark 1 --model_base <model_baseline_path> --model_patch <model_patch_path>
 ```
 
-2. Linear vs. Cosine
+##### 2. Linear vs. Cosine
 Benchmark with `benchmark_id = 2` compares the baseline model using linear schedule
 with the baseline model using cosine schedule.
 
@@ -57,7 +57,7 @@ that specify the path to the saved states of the models:
 python benchmark.py --benchmark 2 --model_lin <model_linear_path> --model_cos <model_cosine_path>
 ```
 
-3. Low Number of Inference Steps on Linear vs. Cosine Schedules
+##### 3. Low Number of Inference Steps on Linear vs. Cosine Schedules
 Benchmark with `benchmark_id = 3` compares the baseline model using linear schedule
 with the baseline model using cosine schedule, but this time on a low (variable) number
 of inference steps.
@@ -69,7 +69,7 @@ Additionally, to control the number of inference steps include argument `--infer
 python benchmark.py --benchmark 3 --model_lin <model_linear_path> --model_cos <model_cosine_path> --inference_steps <num_of_steps>
 ```
 
-4. Baseline model with Dropout on Linear vs. Cosine Schedules
+##### 4. Baseline model with Dropout on Linear vs. Cosine Schedules
 Benchmark with `benchmark_id = 4` compares the baseline model with *dropout*
 using linear schedule with the baseline model using cosine schedule.
 
