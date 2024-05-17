@@ -85,12 +85,12 @@ python benchmark.py --benchmark 4 --model_lin <model_linear_path> --model_cos <m
 Supported CLI arguments:
 | argument | description |
 | -------- | ----------- |
-| `--benchmark` | Specify id of the benchmark you want to run |
+| `--benchmark` | Specify id of the benchmark you want to run (options=[1, 2, 3, 4])|
 | `--torch_device` | Specify torch device name to override default `cuda` |
 | `--model_base` | Path to the saved state of the baseline model |
 | `--model_patch` | Path to the saved state of the model with patch embeddings |
 | `--model_lin` | Path to the saved state of the model trained with linear schedule |
 | `--model_cos` | Path to the saved state of the model trained with cosine schedule |
-| `--inference_steps` | Specify the number of inference steps (applicably only to benchmarks 3 and 4) |
+| `--inference_steps` | Specify the number of inference steps (applicable only to benchmarks 3 and 4) |
 | `--wandb_api` | Specify yout wandb API key to enable logging to your wandb dashboard|
 
