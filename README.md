@@ -22,4 +22,4 @@ Supported CLI arguments:
 | `--wandb_api` | specify yout wandb API key to enable logging to your wandb dashboard|
 | `--torch_device` | specify torch device name to override default `cuda` |
 | `--epochs` | specify the number of training epochs to override the default 2000 |
-
+| `--model` | Which model to train<br>options={baseline,patch,cosine,dropout_lin,dropout_cos}  |

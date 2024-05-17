@@ -34,7 +34,7 @@ parser = ArgumentParser()
 parser.add_argument('--wandb_api', type=str, help='API key for WandB login')
 parser.add_argument('--torch_device', type=str, help='Which torch device to select, default is `cuda`')
 parser.add_argument('--epochs', type=int, help='Override the default number of epochs (2000)')
-parser.add_argument('--model', type=str, choices=['baseline', 'patch', 'cosine', 'dropout_lin', 'dropout_cos'])
+parser.add_argument('--model', type=str, choices=['baseline', 'patch', 'cosine', 'dropout_lin', 'dropout_cos'], help='Which model to train')
 
 args = parser.parse_args()
 
