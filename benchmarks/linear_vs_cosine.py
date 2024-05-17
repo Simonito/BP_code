@@ -114,7 +114,7 @@ def perform_benchmark(model_lin, model_cos, val_dataset, img_out_dir, device, wa
 
             scheduler_lin.set_timesteps(num_inference_steps=1000)
             scheduler_cos.set_timesteps(num_inference_steps=1000)
-            for t in tqdm(scheduler.timesteps):
+            for t in tqdm(scheduler_lin.timesteps):
                 with autocast(enabled=False):
                     with torch.no_grad():
                         model_output_lin = model_lin(
