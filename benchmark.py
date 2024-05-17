@@ -23,6 +23,7 @@ parser.add_argument('--model_base', type=str, help='Path to the saved state of t
 parser.add_argument('--model_patch', type=str, help='Path to the saved state of the model with patch embeddings')
 parser.add_argument('--model_lin', type=str, help='Path to the saved state of the model with linear schedule')
 parser.add_argument('--model_cos', type=str, help='Path to the saved state of the model with cosine schedule')
+parser.add_argument('--inference_steps', type=int, help='Number of inference steps (applicable only with benchmark 3)')
 args = parser.parse_args()
 
 benchmark_num = args.benchmark
@@ -48,7 +49,16 @@ elif benchmark_num == 2:
                           model_cos_path=args.model_cos,
     )
 elif benchmark_num == 3:
-    lowSampleSteps_lin_vs_cos.main(val_dataset=val_dataset, img_size=img_size[0])
+    if args.inference_steps is None:
+        print('Number of inference steps not specified. Using default 1 000')
+    lowSampleSteps_lin_vs_cos.main(val_dataset=val_dataset,
+                                   img_size=img_size[0],
+                                   wandb_api=args.wandb_api,
+                                   torch_device=args.torch_device,
+                                   model_lin_path=args.model_lin,
+                                   model_cos_path=args.model_cos,
+                                   inference_steps=args.inference_steps,
+    )
 elif benchmark_num == 4:
     dropout_lin_vs_cos.main(val_dataset=val_dataset, img_size=img_size[0])
 else:
