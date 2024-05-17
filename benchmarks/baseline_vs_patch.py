@@ -74,10 +74,6 @@ def perform_benchmark(model_orig, model_patch, val_dataset, img_out_dir, device,
 
     n = 1
     for idx, data in enumerate(tqdm(val_dataset)):
-        # early stopping condition
-        if idx == 50:
-            break
-
         inputct = data["ct"][0, ...]  # Pick an input slice of the validation set to be segmented
         inputmr = data["mri"][0, ...]  # Check out the ground truth label mask. If it is empty, pick another input slice.
 
