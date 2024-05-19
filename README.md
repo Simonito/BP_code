@@ -46,7 +46,7 @@ Supported `benchmark_id`s are 1, 2, 3 and 4:
 Benchmark with `benchmark_id = 1` compares the baseline model to the one
 with patch and position embeddings.
 
-To run this benchmark, include arguments `--model_base` and `model_patch`
+To run this benchmark, include arguments `--model_base` and `--model_patch`
 that specify the path to the saved states of the models:
 ```bash
 python benchmark.py --benchmark 1 --model_base <model_baseline_path> --model_patch <model_patch_path>
@@ -56,7 +56,7 @@ python benchmark.py --benchmark 1 --model_base <model_baseline_path> --model_pat
 Benchmark with `benchmark_id = 2` compares the baseline model using linear schedule
 with the baseline model using cosine schedule.
 
-To run this benchmark, include arguments `--model_lin` and `model_cos`
+To run this benchmark, include arguments `--model_lin` and `--model_cos`
 that specify the path to the saved states of the models:
 ```bash
 python benchmark.py --benchmark 2 --model_lin <model_linear_path> --model_cos <model_cosine_path>
@@ -67,7 +67,7 @@ Benchmark with `benchmark_id = 3` compares the baseline model using linear sched
 with the baseline model using cosine schedule, but this time on a low (variable) number
 of inference steps.
 
-To run this benchmark, include arguments `--model_lin` and `model_cos`
+To run this benchmark, include arguments `--model_lin` and `--model_cos`
 that specify the path to the saved states of the models.
 Additionally, to control the number of inference steps include argument `--inference_steps`:
 ```bash
@@ -78,7 +78,7 @@ python benchmark.py --benchmark 3 --model_lin <model_linear_path> --model_cos <m
 Benchmark with `benchmark_id = 4` compares the baseline model with *dropout*
 using linear schedule with the baseline model using cosine schedule.
 
-To run this benchmark, include arguments `--model_lin` and `model_cos`
+To run this benchmark, include arguments `--model_lin` and `--model_cos`
 that specify the path to the saved states of the models.
 The option to control the number of inference steps was kept from previous (3) benchmark.
 To control the number of inference steps include argument `--inference_steps`
